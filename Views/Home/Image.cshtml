@@ -1,0 +1,219 @@
+﻿@model Image
+
+<head>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="@Model.Path">
+    <meta property="og:title" content="@Model.Name" />
+    <meta property="og:description" content="@Model.Author" />
+    <meta property="og:image" content="@Model.Path" />
+    <meta property="og:type" content="website" />
+</head>
+
+<body>
+
+    <img class="card-img-top" src="@Model.Path" onclick="openFullscreenImage('@Model.Path')" style="max-width: 100hw; max-height: 90vh; object-fit: contain;" alt="Card image cap">
+    <h1>Name:@Model.Name</h1>
+    <h2>Author:@Model.Author</h2>
+
+    <p class="card-text">
+        <span id="likes-count-@Model.id">@Model.Likes</span> <i class="fas fa-thumbs-up"></i> |
+        <span id="dislikes-count-@Model.id">@Model.Dislikes</span> <i class="fas fa-thumbs-down"></i>
+    </p>
+    @if ((bool)ViewData["LoggedIn"])
+    {
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-primary" id="like" data-id="@Model.id"><i>👍</i> </button>
+            <button type="button" class="btn btn-danger" id="dislike" data-id="@Model.id"><i>👎</i> </button>
+        </div>
+    }
+    <button type="button" class="btn btn-secondary" onclick="shareOnSocialMedia('twitter')"><i class="fab fa-twitter"></i> Tweet</button>
+
+    @if ((bool)ViewData["LoggedIn"])
+    {
+        <form method="post" action="@Url.Action("AddComment", "Home")" enctype="multipart/form-data">
+            @Html.Hidden("imageIndex", Model.id)
+            <div class="form-group">
+                <label for="comment">Add Comment:</label>
+                <textarea class="form-control" name="comment" rows="2"></textarea>
+            </div>
+
+            <label for="imageInput">Select Image:</label>
+            <div class="input-container">
+                <input type="file" class="form-control-file" id="imageInput" name="images" accept="image/*">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    }
+    @if ((bool)ViewData.Keys.Contains("isAdmin"))
+    {
+        @if ((bool)ViewData["isAdmin"])
+        {
+            <button type="button" onclick="deleteImage()">Delete Image</button>
+        }
+    }
+    <h3>Comments:</h3>
+    <ul>
+        <div class="container-fluid">
+        @foreach (var comment in Model.Сomments)
+        {
+                <div class="container-fluid">
+                    @if ((bool)ViewData.Keys.Contains("isAdmin"))
+                    {
+                        @if ((bool)ViewData["isAdmin"])
+                        {
+                            <button type="button" onclick="deleteComment(@comment.id)">Delete</button>
+                        }
+                    }
+                <li><strong>@comment.Author</strong>: @comment.Name</li>
+                    @if (comment.Path != "")
+                    {
+                <div >
+                    <img class="card-img-bottom" style="max-height: 200px; width:auto; object-fit:scale-down;" src="@comment.Path" alt="comment image">
+                </div>
+                    }
+            <p></p>
+
+            </div>
+
+        }
+        </div>
+    </ul>
+
+    <style>
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .card {
+            width: 20rem;
+            margin: 20px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .card-text {
+            font-size: 1rem;
+        }
+
+        .btn {
+            margin: 5px;
+            width: 45%;
+        }
+
+            .btn i {
+                margin-right: 5px;
+            }
+    </style>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+
+    <script>
+
+        const buttonLike = document.getElementById('like');
+        buttonLike.addEventListener('click', function () {
+            var id = buttonLike.getAttribute("data-id");
+            $.ajax({
+                url: '@Url.Action("Like", "Home")',
+                data: { imageIndex: id },
+                type: 'POST',
+                success: function (data) {
+                    var likes = data.likes;
+                    var dislikes = data.dislikes;
+                    $('#likes-count-' + id).text(likes);
+                    $('#dislikes-count-' + id).text(dislikes);
+                }
+            });
+        });
+
+        const buttonDislike = document.getElementById('dislike');
+        buttonDislike.addEventListener('click', function () {
+            var id = buttonDislike.getAttribute("data-id");
+            $.ajax({
+                url: '@Url.Action("Dislike", "Home")',
+                data: { imageIndex: id },
+                type: 'POST',
+                success: function (data) {
+                    var likes = data.likes;
+                    var dislikes = data.dislikes;
+                    $('#likes-count-' + id).text(likes);
+                    $('#dislikes-count-' + id).text(dislikes);
+                }
+            });
+        });
+        function likeImage(btn) {
+
+        }
+
+        function dislikeImage(btn) {
+            var id = btn.getAttribute("data-id");
+            $.ajax({
+                url: '@Url.Action("Dislike", "Home")',
+                data: { imageIndex: id },
+                type: 'POST',
+                success: function (data) {
+                    var likes = data.likes;
+                    var dislikes = data.dislikes;
+                    $('#likes-count-' + id).text(likes);
+                    $('#dislikes-count-' + id).text(dislikes);
+                }
+            });
+        }
+
+
+    </script>
+
+    <script>
+        function shareOnSocialMedia(platform) {
+            var url = encodeURIComponent(window.location.href);
+            var text = encodeURIComponent('Check out this image!');
+            switch (platform) {
+                case 'twitter':
+                    window.open("https://twitter.com/intent/tweet?url=" + url + "&text=" + text, "_blank");
+                    break;
+                case 'facebook':
+                    window.open("https://www.facebook.com/sharer/sharer.php?u=" + url, "_blank");
+                    break;
+                // Add more cases for other platforms as needed
+                default:
+                    break;
+            }
+        }
+
+
+        function deleteComment(commentId) {
+            $.ajax({
+                type: "POST",
+                url: "/Home/DeleteComment",
+                data: { id: commentId, img: @Model.id },
+                success: function () {
+                    // Refresh the page or remove the deleted comment from the view
+                    location.reload();
+                },
+                error: function () {
+                    alert("Failed to delete the comment.");
+                }
+            });
+        }
+
+        function deleteImage() {
+            $.ajax({
+                type: "POST",
+                url: "/Home/DeleteImage",
+                data: { img: @Model.id },
+                success: function () {
+                    // Refresh the page or remove the deleted comment from the view
+                    location.reload();
+                },
+                error: function () {
+                    alert("Failed to delete the comment.");
+                }
+            });
+        }
+    </script>
+</body>

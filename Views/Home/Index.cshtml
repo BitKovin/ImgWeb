@@ -1,0 +1,378 @@
+﻿@model MainModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<head>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="Index.png">
+    <meta property="og:title" content="  " />
+    <meta property="og:description" content="cool images 😎👍" />
+    <meta property="og:image" content="/Index.png" />
+    <meta property="og:type" content="website" />
+</head>
+
+<body>
+    <!-- Full-screen modal -->
+    <div id="fullscreen-modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img id="fullscreen-image" class="img-fluid" src="" alt="" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+    <form onsubmit="return false;" class="d-flex">
+        <input id="search_line" class="form-control me-2" value="@Model.search" placeholder="Search by author" aria-label="Search">
+        <button class="btn btn-secondary" id="searchBtn" type="submit">Search</button>
+    </form>
+
+    <div class="text-center">
+        <h2 class="display-4">Posts:</h2>
+        <h3 style="position:center">page: @Model.pageNum</h3>
+        <p></p>
+        <div class="image-container">
+            @for (int i = Model.page * 5; i < (Model.page + 1) * 5; i++)
+            {
+                Console.WriteLine(i);
+                @if (i >= Model.images.Count) break;
+                var image = Model.images[i];
+
+                <div class="card">
+                    <img class="card-img-top" src="@image.Path" onclick="openFullscreenImage('@image.id')" alt="Card image cap">
+                    <div class="card-body">
+                        <h5 class="card-title">@image.Name</h5>
+                        <h6 class="card-title">@image.Author</h6>
+                        <p class="card-text">
+                            <span id="likes-count-@image.id">@image.Likes</span> <i class="fas fa-thumbs-up"></i> |
+                            <span id="dislikes-count-@image.id">@image.Dislikes</span> <i class="fas fa-thumbs-down"></i>
+                        </p>
+                        @{
+                            if ((bool)ViewData["LoggedIn"])
+                            {
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-primary" onclick="likeImage(this)" data-id="@image.id"><i>👍</i> </button>
+                                    <button type="button" class="btn btn-danger" onclick="dislikeImage(this)" data-id="@image.id"><i>👎</i> </button>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+
+        <button type="button" class="btn btn-primary" onclick="prev()"><i></i> Prev</button>
+
+        <button type="button" class="btn btn-primary" onclick="next()"><i></i> Next </button>
+    </div>
+
+    <style>
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .card {
+            width: 20rem;
+            margin: 20px;
+        }
+
+        .card-img-top {
+            max-height: 300px;
+            object-fit: cover;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .card-text {
+            font-size: 1rem;
+        }
+
+        .btn {
+            margin: 5px;
+            width: 45%;
+        }
+
+            .btn i {
+                margin-right: 5px;
+            }
+
+
+        .fas fa-thumbs-up {
+            --bs-blue: #0d6efd;
+            --bs-indigo: #6610f2;
+            --bs-purple: #6f42c1;
+            --bs-pink: #d63384;
+            --bs-red: #dc3545;
+            --bs-orange: #fd7e14;
+            --bs-yellow: #ffc107;
+            --bs-green: #198754;
+            --bs-teal: #20c997;
+            --bs-cyan: #0dcaf0;
+            --bs-white: #fff;
+            --bs-gray: #6c757d;
+            --bs-gray-dark: #343a40;
+            --bs-gray-100: #f8f9fa;
+            --bs-gray-200: #e9ecef;
+            --bs-gray-300: #dee2e6;
+            --bs-gray-400: #ced4da;
+            --bs-gray-500: #adb5bd;
+            --bs-gray-600: #6c757d;
+            --bs-gray-700: #495057;
+            --bs-gray-800: #343a40;
+            --bs-gray-900: #212529;
+            --bs-primary: #0d6efd;
+            --bs-secondary: #6c757d;
+            --bs-success: #198754;
+            --bs-info: #0dcaf0;
+            --bs-warning: #ffc107;
+            --bs-danger: #dc3545;
+            --bs-light: #f8f9fa;
+            --bs-dark: #212529;
+            --bs-primary-rgb: 13,110,253;
+            --bs-secondary-rgb: 108,117,125;
+            --bs-success-rgb: 25,135,84;
+            --bs-info-rgb: 13,202,240;
+            --bs-warning-rgb: 255,193,7;
+            --bs-danger-rgb: 220,53,69;
+            --bs-light-rgb: 248,249,250;
+            --bs-dark-rgb: 33,37,41;
+            --bs-white-rgb: 255,255,255;
+            --bs-black-rgb: 0,0,0;
+            --bs-body-rgb: 33,37,41;
+            --bs-font-sans-serif: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+            --bs-font-monospace: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+            --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+            --bs-body-font-family: var(--bs-font-sans-serif);
+            --bs-body-font-size: 1rem;
+            --bs-body-font-weight: 400;
+            --bs-body-line-height: 1.5;
+            --bs-body-color: #212529;
+            --bs-body-bg: #fff;
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+            word-wrap: break-word;
+            text-transform: none;
+            text-align: center;
+            user-select: none;
+            font-size: 1rem;
+            color: #fff;
+            cursor: pointer;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            line-height: 1;
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            margin-right: 5px;
+        }
+
+        .fas fa-thumbs-down {
+            --bs-blue: #0d6efd;
+            --bs-indigo: #6610f2;
+            --bs-purple: #6f42c1;
+            --bs-pink: #d63384;
+            --bs-red: #dc3545;
+            --bs-orange: #fd7e14;
+            --bs-yellow: #ffc107;
+            --bs-green: #198754;
+            --bs-teal: #20c997;
+            --bs-cyan: #0dcaf0;
+            --bs-white: #fff;
+            --bs-gray: #6c757d;
+            --bs-gray-dark: #343a40;
+            --bs-gray-100: #f8f9fa;
+            --bs-gray-200: #e9ecef;
+            --bs-gray-300: #dee2e6;
+            --bs-gray-400: #ced4da;
+            --bs-gray-500: #adb5bd;
+            --bs-gray-600: #6c757d;
+            --bs-gray-700: #495057;
+            --bs-gray-800: #343a40;
+            --bs-gray-900: #212529;
+            --bs-primary: #0d6efd;
+            --bs-secondary: #6c757d;
+            --bs-success: #198754;
+            --bs-info: #0dcaf0;
+            --bs-warning: #ffc107;
+            --bs-danger: #dc3545;
+            --bs-light: #f8f9fa;
+            --bs-dark: #212529;
+            --bs-primary-rgb: 13,110,253;
+            --bs-secondary-rgb: 108,117,125;
+            --bs-success-rgb: 25,135,84;
+            --bs-info-rgb: 13,202,240;
+            --bs-warning-rgb: 255,193,7;
+            --bs-danger-rgb: 220,53,69;
+            --bs-light-rgb: 248,249,250;
+            --bs-dark-rgb: 33,37,41;
+            --bs-white-rgb: 255,255,255;
+            --bs-black-rgb: 0,0,0;
+            --bs-body-rgb: 33,37,41;
+            --bs-font-sans-serif: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+            --bs-font-monospace: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+            --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+            --bs-body-font-family: var(--bs-font-sans-serif);
+            --bs-body-font-size: 1rem;
+            --bs-body-font-weight: 400;
+            --bs-body-line-height: 1.5;
+            --bs-body-color: #212529;
+            --bs-body-bg: #fff;
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+            word-wrap: break-word;
+            text-transform: none;
+            text-align: center;
+            user-select: none;
+            font-size: 1rem;
+            color: #fff;
+            cursor: pointer;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            line-height: 1;
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            margin-right: 5px;
+        }
+
+    </style>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+
+    <script>
+        function openFullscreenImage(id) {
+
+
+            window.location.href = "/Home/Image/?id=" + id;
+
+
+            //$('#fullscreen-image').attr('src', path);
+            //$('#fullscreen-modal').modal('show');
+        }
+    </script>
+
+    <!-- проблема була в тому, що кнопка передавала свій id і він чогось був 0. Тепер передається сама кнопка І ЯКИМОСЬ ХЄРОМ ЦЕ ФІКСИТЬ ПРОБЛЕМУ -->
+    <script>
+        function likeImage(btn) {
+            var id = btn.getAttribute("data-id");
+            $.ajax({
+                url: '@Url.Action("Like", "Home")',
+                data: { imageIndex: id },
+                type: 'POST',
+                success: function (data) {
+                    var likes = data.likes;
+                    var dislikes = data.dislikes;
+                    $('#likes-count-' + id).text(likes);
+                    $('#dislikes-count-' + id).text(dislikes);
+                }
+            });
+        }
+
+        function dislikeImage(btn) {
+            var id = btn.getAttribute("data-id");
+            $.ajax({
+                url: '@Url.Action("Dislike", "Home")',
+                data: { imageIndex: id },
+                type: 'POST',
+                success: function (data) {
+                    var likes = data.likes;
+                    var dislikes = data.dislikes;
+                    $('#likes-count-' + id).text(likes);
+                    $('#dislikes-count-' + id).text(dislikes);
+                }
+            });
+        }
+
+
+
+
+        function showLoadingImage() {
+            var loadingDiv = document.createElement("div");
+            loadingDiv.id = "loading";
+            loadingDiv.innerHTML = "<img src='loading.gif' alt='Loading...' />";
+            document.body.appendChild(loadingDiv);
+        }
+
+        function hideLoadingImage() {
+            var loadingDiv = document.getElementById("loading");
+            document.body.removeChild(loadingDiv);
+        }
+
+
+        function createLoader() {
+            var loader = document.createElement("div");
+            loader.style.width = "50px";
+            loader.style.height = "50px";
+            loader.style.border = "4px solid #f3f3f3";
+            loader.style.borderTop = "4px solid #3498db";
+            loader.style.borderRadius = "50%";
+            loader.style.position = "absolute";
+            loader.style.top = "50%";
+            loader.style.left = "50%";
+            loader.style.transform = "translate(-50%, -50%)";
+            return loader;
+        }
+
+        function startLoader() {
+            var loader = createLoader();
+            document.body.appendChild(loader);
+
+            var rotation = 0;
+            var intervalId = setInterval(function () {
+                rotation += 10;
+                loader.style.transform = "translate(-50%, -50%) rotate(" + rotation + "deg)";
+            }, 50);
+
+            loader.intervalId = intervalId;
+        }
+
+        function stopLoader() {
+            var loader = document.querySelector("div.loader");
+            clearInterval(loader.intervalId);
+            document.body.removeChild(loader);
+        }
+
+
+
+        function prev() {
+            startLoader();
+            var page = parseInt(@Model.page);
+            let searchrequest = document.getElementById("search_line").value.trim().toLowerCase();
+            window.location.href = "/Home/PrevPage/?page=" + page + "&author=" + searchrequest;
+        }
+
+        function next() {
+            startLoader();
+            var page = parseInt(@Model.page);
+            let searchrequest = document.getElementById("search_line").value.trim().toLowerCase();
+            window.location.href = "/Home/NextPage/?page=" + page + "&author=" + searchrequest;
+        }
+
+
+        const button1 = document.getElementById('searchBtn');
+        button1.addEventListener('click', function () {
+            var page = parseInt(@Model.page);
+            let searchrequest = document.getElementById("search_line").value.trim().toLowerCase();
+            window.location.href = "/Home/Index/?page=" + page + "&author=" + searchrequest;
+        });
+
+    </script>
+</body>

@@ -1,0 +1,112 @@
+﻿@model User
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Account | @Model.Username</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f5f5f5;
+			color: #333;
+		}
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 20px;
+		}
+		h1 {
+			font-size: 36px;
+			margin-bottom: 10px;
+		}
+		h2 {
+			font-size: 24px;
+			margin-bottom: 10px;
+		}
+		.image-container {
+			display: flex;
+			flex-wrap: wrap;
+			margin: 0 -10px;
+		}
+		.image-container > div {
+			flex: 1 1 300px;
+			margin: 10px;
+			background-color: #fff;
+			box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+			overflow: hidden;
+		}
+		.image-container > div:hover {
+			box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+		}
+		.image-container img {
+			display: block;
+			max-width: 100%;
+			height: auto;
+		}
+		.image-info {
+			padding: 10px;
+		}
+		.image-info p {
+			margin: 0;
+			font-size: 18px;
+			line-height: 1.5;
+		}
+		.image-info p.likes i,
+		.image-info p.dislikes i {
+			margin-right: 5px;
+			color: #999;
+		}
+		.image-info p.likes {
+			color: #0066cc;
+		}
+		.image-info p.dislikes {
+			color: #ff3300;
+		}
+		.btn {
+			display: inline-block;
+			padding: 10px 20px;
+			background-color: #0066cc;
+			color: #fff;
+			text-decoration: none;
+			border-radius: 5px;
+			transition: background-color 0.2s ease;
+		}
+		.btn:hover {
+			background-color: #0052a3;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>Account</h1>
+		<h2>@Model.Username's Posts</h2>
+		<div class="image-container">
+			@foreach (var image in HomeController.GetImagesFromUser(Model.Username))
+			{
+				<div>
+					<img src="@image.Path" onclick="openFullscreenImage('@image.id')" alt="@image.Author">
+					<div class="image-info">
+						<p>Author: @image.Name</p>
+						<p class="likes"><i class="fas fa-thumbs-up"></i> @image.Likes</p>
+						<p class="dislikes"><i class="fas fa-thumbs-down"></i> @image.Dislikes</p>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+</body>
+
+<script>
+	function openFullscreenImage(id) {
+
+
+		window.location.href = "/Home/Image/?id=" + id;
+
+
+		//$('#fullscreen-image').attr('src', path);
+		//$('#fullscreen-modal').modal('show');
+	}
+</script>

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\users\" />
+    <Folder Include="wwwroot\Images\" />
+    <Folder Include="Views\Account\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Images\image1.png" />
+    <None Include="wwwroot\Images\image2.png" />
+    <None Include="wwwroot\Images\image3.png" />
+  </ItemGroup>
+
+</Project>
